@@ -7,11 +7,6 @@ class CSRFProtection(FlaskForm):
     """CSRFProtection form, intentionally left blank."""
 
 
-class MessageForm(FlaskForm):
-    """Form for adding/editing messages."""
-
-    text = TextAreaField('text', validators=[DataRequired()])
-
 
 class UserAddForm(FlaskForm):
     """Form for adding users."""
