@@ -1,148 +1,148 @@
-"""SQLAlchemy models for Warbler."""
+# """SQLAlchemy models for Warbler."""
 
-from datetime import datetime
+# from datetime import datetime
 
-from flask_bcrypt import Bcrypt
-from flask_sqlalchemy import SQLAlchemy
+# from flask_bcrypt import Bcrypt
+# from flask_sqlalchemy import SQLAlchemy
 
-bcrypt = Bcrypt()
-db = SQLAlchemy()
+# bcrypt = Bcrypt()
+# db = SQLAlchemy()
 
-DEFAULT_IMAGE_URL = "/static/images/default-pic.png"
-DEFAULT_HEADER_IMAGE_URL = "/static/images/warbler-hero.jpg"
-
-
-class Follows(db.Model):
-    """Connection of a follower <-> followed_user."""
-
-    __tablename__ = 'follows'
-
-    user_being_followed_id = db.Column(
-        db.Integer,
-        db.ForeignKey('users.id', ondelete="cascade"),
-        primary_key=True,
-    )
-
-    user_following_id = db.Column(
-        db.Integer,
-        db.ForeignKey('users.id', ondelete="cascade"),
-        primary_key=True,
-    )
+# DEFAULT_IMAGE_URL = "/static/images/default-pic.png"
+# DEFAULT_HEADER_IMAGE_URL = "/static/images/warbler-hero.jpg"
 
 
-class User(db.Model):
-    """User in the system."""
+# class Follows(db.Model):
+#     """Connection of a follower <-> followed_user."""
 
-    __tablename__ = 'users'
+#     __tablename__ = 'follows'
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True,
-    )
+#     user_being_followed_id = db.Column(
+#         db.Integer,
+#         db.ForeignKey('users.id', ondelete="cascade"),
+#         primary_key=True,
+#     )
 
-    email = db.Column(
-        db.Text,
-        nullable=False,
-        unique=True,
-    )
+#     user_following_id = db.Column(
+#         db.Integer,
+#         db.ForeignKey('users.id', ondelete="cascade"),
+#         primary_key=True,
+#     )
 
-    username = db.Column(
-        db.Text,
-        nullable=False,
-        unique=True,
-    )
 
-    image_url = db.Column(
-        db.Text,
-        default=DEFAULT_IMAGE_URL,
-    )
+# class User(db.Model):
+#     """User in the system."""
 
-    header_image_url = db.Column(
-        db.Text,
-        default=DEFAULT_HEADER_IMAGE_URL,
-    )
+#     __tablename__ = 'users'
 
-    bio = db.Column(
-        db.Text,
-    )
+#     id = db.Column(
+#         db.Integer,
+#         primary_key=True,
+#     )
 
-    location = db.Column(
-        db.Text,
-    )
+#     email = db.Column(
+#         db.Text,
+#         nullable=False,
+#         unique=True,
+#     )
 
-    password = db.Column(
-        db.Text,
-        nullable=False,
-    )
+#     username = db.Column(
+#         db.Text,
+#         nullable=False,
+#         unique=True,
+#     )
 
-    messages = db.relationship('Message', backref="user")
+#     image_url = db.Column(
+#         db.Text,
+#         default=DEFAULT_IMAGE_URL,
+#     )
 
-    followers = db.relationship(
-        "User",
-        secondary="follows",
-        primaryjoin=(Follows.user_being_followed_id == id),
-        secondaryjoin=(Follows.user_following_id == id),
-        backref="following",
-    )
+#     header_image_url = db.Column(
+#         db.Text,
+#         default=DEFAULT_HEADER_IMAGE_URL,
+#     )
 
-    liked_messages = db.relationship('Message', secondary="likes")
+#     bio = db.Column(
+#         db.Text,
+#     )
 
-    def __repr__(self):
-        return f"<User #{self.id}: {self.username}, {self.email}>"
+#     location = db.Column(
+#         db.Text,
+#     )
 
-    @classmethod
-    def signup(cls, username, email, password, image_url=DEFAULT_IMAGE_URL):
-        """Sign up user.
+#     password = db.Column(
+#         db.Text,
+#         nullable=False,
+#     )
 
-        Hashes password and adds user to system.
-        """
+    # messages = db.relationship('Message', backref="user")
 
-        hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
+    # followers = db.relationship(
+    #     "User",
+    #     secondary="follows",
+    #     primaryjoin=(Follows.user_being_followed_id == id),
+    #     secondaryjoin=(Follows.user_following_id == id),
+    #     backref="following",
+    # )
 
-        user = User(
-            username=username,
-            email=email,
-            password=hashed_pwd,
-            image_url=image_url,
-        )
+    # liked_messages = db.relationship('Message', secondary="likes")
 
-        db.session.add(user)
-        return user
+    # def __repr__(self):
+    #     return f"<User #{self.id}: {self.username}, {self.email}>"
 
-    @classmethod
-    def authenticate(cls, username, password):
-        """Find user with `username` and `password`.
+    # @classmethod
+    # def signup(cls, username, email, password, image_url=DEFAULT_IMAGE_URL):
+    #     """Sign up user.
 
-        This is a class method (call it on the class, not an individual user.)
-        It searches for a user whose password hash matches this password
-        and, if it finds such a user, returns that user object.
+    #     Hashes password and adds user to system.
+    #     """
 
-        If this can't find matching user (or if password is wrong), returns
-        False.
-        """
+    #     hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
 
-        user = cls.query.filter_by(username=username).first()
+    #     user = User(
+    #         username=username,
+    #         email=email,
+    #         password=hashed_pwd,
+    #         image_url=image_url,
+    #     )
 
-        if user:
-            is_auth = bcrypt.check_password_hash(user.password, password)
-            if is_auth:
-                return user
+    #     db.session.add(user)
+    #     return user
 
-        return False
+    # @classmethod
+    # def authenticate(cls, username, password):
+    #     """Find user with `username` and `password`.
 
-    def is_followed_by(self, other_user):
-        """Is this user followed by `other_user`?"""
+    #     This is a class method (call it on the class, not an individual user.)
+    #     It searches for a user whose password hash matches this password
+    #     and, if it finds such a user, returns that user object.
 
-        found_user_list = [
-            user for user in self.followers if user == other_user]
-        return len(found_user_list) == 1
+    #     If this can't find matching user (or if password is wrong), returns
+    #     False.
+    #     """
 
-    def is_following(self, other_user):
-        """Is this user following `other_use`?"""
+    #     user = cls.query.filter_by(username=username).first()
 
-        found_user_list = [
-            user for user in self.following if user == other_user]
-        return len(found_user_list) == 1
+    #     if user:
+    #         is_auth = bcrypt.check_password_hash(user.password, password)
+    #         if is_auth:
+    #             return user
+
+    #     return False
+
+    # def is_followed_by(self, other_user):
+    #     """Is this user followed by `other_user`?"""
+
+    #     found_user_list = [
+    #         user for user in self.followers if user == other_user]
+    #     return len(found_user_list) == 1
+
+    # def is_following(self, other_user):
+    #     """Is this user following `other_use`?"""
+
+    #     found_user_list = [
+    #         user for user in self.following if user == other_user]
+    #     return len(found_user_list) == 1
 
 
 
@@ -157,21 +157,21 @@ class User(db.Model):
 #     db.init_app(app)
 
 
-class Like(db.Model):
-    """Join table between users and messages (the join represents a like)."""
+# class Like(db.Model):
+#     """Join table between users and messages (the join represents a like)."""
 
-    __tablename__ = 'likes'
+#     __tablename__ = 'likes'
 
-    user_id = db.Column(
-        db.Integer,
-        db.ForeignKey('users.id', ondelete='CASCADE'),
-        nullable=False,
-        primary_key=True,
-    )
+#     user_id = db.Column(
+#         db.Integer,
+#         db.ForeignKey('users.id', ondelete='CASCADE'),
+#         nullable=False,
+#         primary_key=True,
+#     )
 
-    message_id = db.Column(
-        db.Integer,
-        db.ForeignKey('messages.id', ondelete='CASCADE'),
-        nullable=False,
-        primary_key=True,
-    )
+#     message_id = db.Column(
+#         db.Integer,
+#         db.ForeignKey('messages.id', ondelete='CASCADE'),
+#         nullable=False,
+#         primary_key=True,
+#     )

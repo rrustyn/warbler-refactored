@@ -1,15 +1,15 @@
 from models import Message
 from forms import MessageForm
 from database import db
-from flask import Blueprint, flash, render_template, redirect
+from flask import Blueprint, flash, render_template, redirect, g, abort
 
 messages = Blueprint('messages', __name__,
                       template_folder="templates")
-                      
+
 ##############################################################################
 # Messages routes:
 
-@messages.route('/messages/new', methods=["GET", "POST"])
+@messages.route('/new', methods=["GET", "POST"])
 def add_message():
     """Add a message:
 
@@ -32,7 +32,7 @@ def add_message():
     return render_template('messages/create.html', form=form)
 
 
-@messages.get('/messages/<int:message_id>')
+@messages.get('/<int:message_id>')
 def show_message(message_id):
     """Show a message."""
 
@@ -44,7 +44,7 @@ def show_message(message_id):
     return render_template('messages/show.html', message=msg)
 
 
-@messages.post('/messages/<int:message_id>/delete')
+@messages.post('/<int:message_id>/delete')
 def delete_message(message_id):
     """Delete a message.
 
@@ -67,3 +67,30 @@ def delete_message(message_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}")
+
+@messages.post('/<int:message_id>/like')
+def toggle_like(message_id):
+    """Toggle a liked message for the currently-logged-in user.
+
+    Redirect to homepage on success.
+    """
+
+    form = g.csrf_form
+
+    if not form.validate_on_submit() or not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    liked_message = Message.query.get_or_404(message_id)
+    if liked_message.user_id == g.user.id:
+        return abort(403)
+
+    if liked_message in g.user.liked_messages:
+        g.user.liked_messages.remove(liked_message)
+    else:
+        g.user.liked_messages.append(liked_message)
+
+    db.session.commit()
+
+    return redirect("/")
+

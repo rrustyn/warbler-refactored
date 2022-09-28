@@ -2,10 +2,12 @@ from models import User
 from forms import UserEditForm, UserAddForm
 from database import db
 from flask import Blueprint, flash, render_template, redirect, g, request
+from models import (
+    db, connect_db, User, Message, DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL)
+from __init__ import do_logout
 
 users = Blueprint('users', __name__,
                       template_folder="templates")
-
 
 
 @users.get('/users')
