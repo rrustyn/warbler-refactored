@@ -1,18 +1,16 @@
 
-from flask import Flask, session
+from flask import Flask, session,g
 from flask_debugtoolbar import DebugToolbarExtension
 
-from forms import (
-    UserAddForm, UserEditForm, LoginForm, MessageForm,
-)
+from warbler.root.forms import CSRFProtection
+from warbler.users.models import User
+from database import connect_db
 
-from warbler.root import CSRFProtection, LoginForm
-
-from models import (
-    db, connect_db, User, Message, DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL)
 
 from warbler.messages.views import messages
 from warbler.users.views import users
+from warbler.root.views import root
+
 import os
 
 from dotenv import load_dotenv
@@ -23,6 +21,7 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 app.register_blueprint(messages, url_prefix="/messages" )
 app.register_blueprint(users, url_prefix="/users")
+app.register_blueprint(root, url_prefix="/")
 
 load_dotenv()
 

@@ -1,11 +1,21 @@
-from flask import Blueprint, flash, render_template, redirect, g, request
+from flask import Blueprint, flash, render_template, redirect, g, request,session
+from users import UserAddForm, User
+from __init__ import do_login, do_logout
+from forms import LoginForm
+from database import db
+from messages.models import Message
+from sqlalchemy.exc import IntegrityError
+
+
+
+
 from __init__ import CURR_USER_KEY
 
 root = Blueprint('root', __name__,
                       template_folder="templates")
 
 
-@root.route('/signup', methods=["GET", "POST"])
+@root.route('signup', methods=["GET", "POST"])
 def signup():
     """Handle user signup.
 
@@ -43,7 +53,7 @@ def signup():
         return render_template('users/signup.html', form=form)
 
 
-@root.route('/login', methods=["GET", "POST"])
+@root.route('login', methods=["GET", "POST"])
 def login():
     """Handle user login and redirect to homepage on success."""
 
@@ -64,7 +74,7 @@ def login():
     return render_template('users/login.html', form=form)
 
 
-@root.post('/logout')
+@root.post('logout')
 def logout():
     """Handle logout of user and redirect to homepage."""
 
@@ -83,7 +93,7 @@ def logout():
 # Homepage and error pages
 
 
-@root.get('/')
+@root.get('')
 def homepage():
     """Show homepage:
 
